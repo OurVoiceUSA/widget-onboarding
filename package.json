@@ -1,0 +1,31 @@
+{
+  "name": "widget-onboarding",
+  "version": "0.0.1",
+  "funding": {
+    "type": "patreon",
+    "url": "https://www.patreon.com/hellovoter"
+  },
+  "description": "An embeddable widget to help onboard volunteers to the HelloVoter platform",
+  "scripts": {
+    "build": "./node_modules/.bin/webpack --config webpack.config-dev.js",
+    "build-prod": "./node_modules/.bin/webpack --config webpack.config-prod.js"
+  },
+  "author": "Our Voice USA",
+  "license": "AGPL-3.0",
+  "devDependencies": {
+    "@babel/cli": "^7.8.4",
+    "@babel/core": "^7.8.6",
+    "@babel/polyfill": "^7.8.3",
+    "@babel/preset-env": "^7.8.6",
+    "@babel/preset-react": "^7.8.3",
+    "babel-loader": "^8.0.6",
+    "css-loader": "^3.4.2",
+    "html-loader": "^0.5.5",
+    "react": "^16.13.0",
+    "react-dom": "^16.13.0",
+    "style-loader": "^0.19.1",
+    "uglifyjs-webpack-plugin": "^2.2.0",
+    "webpack": "^4.41.6",
+    "webpack-cli": "^3.3.11"
+  }
+}
