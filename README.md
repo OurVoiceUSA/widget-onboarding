@@ -4,7 +4,7 @@ Our Voice USA is a 501(c)(3) non-profit, non-partisan organization for civic edu
 
 ## Setup
 
-Simply run `npm install` in this directory, then `npm run build` (or `npm run build-release` for production) and `npm run start` to serve the widget. You will want to add the following embed code to the host site:
+Simply run `npm install` in this directory, then `npm run build` (or `npm run build-release` for production) and `npm run start` to serve the widget. You will want to add the following embed code to the host site (note this is the development example, for production you will have to adjust server and output js):
 
     <script>
     (function (w,d,s,o,f,js,fjs) {
@@ -12,8 +12,13 @@ Simply run `npm install` in this directory, then `npm run build` (or `npm run bu
       js = d.createElement(s), fjs = d.getElementsByTagName(s)[0];
       js.id = o; js.src = f; js.async = 1; fjs.parentNode.insertBefore(js, fjs)
     }(window, document, 'script', 'mw', 'http://localhost:8080/widget-dev.js'))
-    mw('init', { server: 'https://ourvoiceusa.org/hellovoter/api', questions: ['name', 'age', 'party-affiliation', 'location', 'registered-to-vote']})
+    mw('init', { server: 'https://ourvoiceusa.org/hellovoter/api', questions: ['name', 'age', 'party-affiliation', 'address', 'registered-to-vote']})
     </script>
+
+To trigger the opening of the widget, add this button somewhere in the host site, wherever you'd like to put it:
+
+    <button type="button" name="button" class="onboarding-widget-button" style="width: 220px; height: 100px; padding: 8px 8px 8px 32px; border-radius: 4px; background: #f0f0f0 url(https://ourvoiceusa.org/wp-content/uploads/2019/01/cropped-20190107_174246.png); background-repeat: no-repeat; background-position: 8px 8px;">
+    </button>
 
 You should be all set!
 

@@ -1,4 +1,4 @@
-import { show } from './views/message'
+import { build } from './views/modal'
 
 function main (window) {
   console.log('Onboarding Widget starting up.....')
@@ -13,21 +13,12 @@ function main (window) {
       if (thisCommand[0] == 'init') {
         config = thisCommand[1]
         console.log(`Onboarding Widget started with config: `, config)
+        build(config)
       }
-
       else {
-        show(config)
+        commandHandler(thisCommand[0], thisCommand[1])
       }
     }
-  }
-
-  const buttons = document.getElementsByClassName('onboarding-widget-button')
-
-  for (var x = 0; x < buttons.length; x++) {
-    buttons[x].addEventListener('click', (e) => {
-      e.stopPropagation()
-      show(config)
-    })
   }
 }
 
@@ -35,8 +26,9 @@ function commandHandler (command, params) {
   console.log(`Handling command: ${command} ${params}`)
 
   switch (command) {
-    case 'show':
-      show(params)
+    // For future use
+    case 'build':
+      build(params)
       break
     default:
       console.warn(`No handler defined for ${command}`)

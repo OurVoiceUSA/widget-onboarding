@@ -1,0 +1,43 @@
+.onboarding-widget-overlay {
+  z-index: 10001;
+  position: fixed;
+  top: 0px;
+  bottom: 0px;
+  left: 0px;
+  right: 0px;
+  background-color: rgba(100, 100, 100, 0.9);
+}
+
+.onboarding-widget-modal {
+  z-index: 10002;
+  display: block;
+  width: 50%;
+  max-width: 700px;
+  margin-left: auto;
+  margin-right: auto;
+  margin-top: 10%;
+  padding: 10px 10px;
+  background: #fff;
+  border: solid 1px #333;
+  border-radius: 10px;
+}
+
+@media (max-width: 920px) {
+  .onboarding-widget-modal {
+    margin-top: 5%;
+    width: 80%;
+    max-height: 80vh;
+    overflow: scroll;
+  }
+}
+
+img {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.onboarding-widget-logo {
+  margin-top: 20px;
+  margin-bottom: 20px;
+}
