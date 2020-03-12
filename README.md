@@ -4,7 +4,7 @@ Our Voice USA is a 501(c)(3) non-profit, non-partisan organization for civic edu
 
 ## Setup
 
-Simply run `npm install` in this directory, then `npm run build` (or `npm run build-release` for production) and `npm run start` to serve the widget. You will want to add the following embed code to the host site (note this is the development example, for production you will have to adjust server and output js):
+Simply run `npm install` in this directory, then `npm run build` (or `npm run build-prod` for production). You will want to add the following embed code to the host site (note this is the development example, for production you will have to adjust widget url and server url):
 
     <script>
     (function (w,d,s,o,f,js,fjs) {
@@ -26,7 +26,7 @@ You should be all set!
 
 Given the configuration you see in the above example:
 
-    mw('init', { server: 'https://ourvoiceusa.org/hellovoter/api', questions: ['name', 'age', 'party-affiliation', 'location', 'registered-to-vote']})
+    mw('init', { server: 'https://ourvoiceusa.org/hellovoter/api', questions: ['name', 'age', 'party-affiliation', 'address', 'registered-to-vote']})
 
 'server' is the HelloVoter server instance the widget will talk to in order to add the volunteer to the user list, assign them a turf, and return a QR code.
 
