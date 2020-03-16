@@ -1,5 +1,7 @@
 ## Introduction
 
+This widget helps a campaign volunteer to sign up with Hello Voter and download the app to their phone. A campaign manager can put the widget on their campaign's website (or any website) to encourage potential volunteers to sign up.
+
 Our Voice USA is a 501(c)(3) non-profit, non-partisan organization for civic education. We are writing tools to engage everyday citizens with the political process by providing easy access to civic information that's relevant to the individual.
 
 ## Setup
