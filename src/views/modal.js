@@ -5,6 +5,7 @@ import React from 'react'
 import ReactDOM from 'react-dom'
 import ReactModal from 'react-modal'
 
+import Alert from '@material-ui/lab/Alert'
 import Typography from '@material-ui/core/Typography'
 import Grid from '@material-ui/core/Grid'
 import TextField from '@material-ui/core/TextField'
@@ -16,8 +17,10 @@ import Button from '@material-ui/core/Button'
 import QRCode from 'qrcode'
 
 function _inviteLink(inviteCode, server, orgId) {
-  return 'http'+(server.match(/:8080$/)?'':'s')+'://'+server+'/HelloVoterHQ/'+(orgId?orgId+'/':'')+'mobile/invite?inviteCode='+inviteCode+'&'+(orgId?'orgId='+orgId:'server='+server)
+  return server+'/HelloVoterHQ/'+(orgId?orgId+'/':'')+'mobile/invite?inviteCode='+inviteCode+'&'+(orgId?'orgId='+orgId:'server='+server)
 }
+
+let openModalEventListener
 
 class Modal extends React.Component {
   constructor () {
@@ -35,7 +38,9 @@ class Modal extends React.Component {
       registered: window.localStorage.getItem('onboarding-widget-registered') === 'true' ? true : false,
       invitelink: window.localStorage.getItem('onboarding-widget-invitelink'),
       server: null,
-      qr: null
+      qr: null,
+      alertMsg: null,
+      severity: null
     }
 
     this.handleOpenModal = this.handleOpenModal.bind(this)
@@ -54,11 +59,14 @@ class Modal extends React.Component {
     // Set event handlers for any button with the class `onboarding-widget-button` to show the modal
     const buttons = document.getElementsByClassName('onboarding-widget-button')
 
+    // closure for open modal, might need to remove later
+    openModalEventListener = (e) => {
+      e.stopPropagation()
+      this.handleOpenModal()
+    }
+
     for (var x = 0; x < buttons.length; x++) {
-      buttons[x].addEventListener('click', (e) => {
-        e.stopPropagation()
-        this.handleOpenModal()
-      })
+      buttons[x].addEventListener('click', openModalEventListener)
     }
   }
 
@@ -69,9 +77,38 @@ class Modal extends React.Component {
       this.state.qr = await QRCode.toDataURL(this.state.invitelink)
     }
 
-    // If we have the server from the config, use it. If not, warn?
+    let configError = false
+
+    // If we have the server from the config, use it. If not, warn.
     if (this.props.server) {
       this.state.server = this.props.server
+    } else {
+      configError = true
+    }
+
+    if (this.props.formId) {
+      this.state.formId = this.props.formId
+    } else {
+      configError = true
+    }
+
+    const validQuestions = ['name', 'age', 'party-affiliation', 'address', 'registered-to-vote']
+    for (var x = 0; x < this.props.questions.length; x++) {
+      const q = this.props.questions[x]
+      if (validQuestions.indexOf(q) === -1) {
+        configError = true
+        break
+      }
+    }
+
+    if (configError) {
+      // No server specified, or invalid question... replace button with error text
+      const buttons = document.getElementsByClassName('onboarding-widget-button')
+      for (var x = 0; x < buttons.length; x++) {
+        buttons[x].style.background = ''
+        buttons[x].innerHTML = 'HelloVoter widget failed to load.'
+        buttons[x].removeEventListener('click', openModalEventListener)
+      }
     }
   }
 
@@ -138,8 +175,35 @@ class Modal extends React.Component {
     })
   }
 
+  handleCloseAlert () {
+    this.setState({ severity: null, alertMsg: null })
+  }
+
   async handleSignUp (e) {
     e.preventDefault()
+
+    const addr = window.encodeURI(this.state.address1 + this.state.address2)
+
+    let geocoderesponse
+
+    try {
+      geocoderesponse = await fetch(`https://nominatim.openstreetmap.org/search?q=${this.state.address1 + this.address2 ? this.address2 : ''},+${this.state.city},+${this.state.state},+usa&format=json&limit=1`)
+    } catch (err) {
+      this.setState({ severity: 'error', alertMsg: 'OSM problem finding that address' })
+      throw new Error('There are unexpected problems; please try again later.')
+    }
+
+    if (geocoderesponse.status >= 400) {
+      this.setState({ severity: 'error', alertMsg: 'OSM problem finding that address' })
+      throw new Error('There are unexpected problems; please try again later.')
+    }
+
+    const geocodeobj = await geocoderesponse.json()
+
+    if (!geocodeobj[0]) {
+      this.setState({ severity: 'error', alertMsg: 'Address not found' })
+      throw new Error('Address not found')
+    }
 
     const payload = {
       name: this.state.name,
@@ -150,21 +214,34 @@ class Modal extends React.Component {
       city: this.state.city,
       state: this.state.state,
       zip: this.state.zip,
-      registered: this.state.registered
+      registered: this.state.registered,
+      latitude: geocodeobj[0].lat,
+      longitude: geocodeobj[0].lon,
+      formId: this.state.formId
     }
 
-    const response = await fetch(this.state.server, {
-      method: 'POST',
-      headers: {
-        "Accept": "text/plain",
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify(payload)
-    })
+    let hellovoterresponse
 
-    if (response.status >= 400) throw new Error(await response.text())
+    try {
+      hellovoterresponse = await fetch(this.state.server + '/HelloVoterHQ/api/v1/public/onboard', {
+        method: 'POST',
+        headers: {
+          "Accept": "text/plain",
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(payload)
+      })
+    } catch (err) {
+      this.setState({ severity: 'error', alertMsg: `Error from server: ${err}` })
+      throw new Error(err)
+    }
 
-    const invite = await response.text()
+    if (hellovoterresponse.status >= 400) {
+      this.setState({ severity: 'error', alertMsg: `Error from server: ${hellovoterresponse.statusText}` })
+      throw new Error(hellovoterresponse.statusText)
+    }
+
+    const invite = await hellovoterresponse.text()
 
     this.setState({ invitelink: _inviteLink(invite, this.props.server) }, () => {
       window.localStorage.setItem('onboarding-widget-invitelink', this.state.invitelink)
@@ -174,17 +251,40 @@ class Modal extends React.Component {
   }
 
   render () {
+    const server = this.props.server
     const questions = this.props.questions
     const inputWidth = 8
+
+    const alert = this.state.alertMsg ?
+      <Alert severity={ this.state.severity } onClose={ () => {
+        this.setState({ severity: null, alertMsg: null })
+      } }>{ this.state.alertMsg }</Alert> : ''
+
     const form = this.state.qr ?
       <>
-      <img src={ this.state.qr } />
-      <Grid item>
-        <Button onClick={ this.handleCloseModal }
-                variant="contained" color="secondary">Close</Button>
-      </Grid>
+        <img src={ this.state.qr } />
+        <Grid style={{ padding: 20 }}
+              container
+              spacing={ 5 }
+              justify="space-evenly"
+              alignItems="center">
+          <a href="https://play.google.com/store/apps/details?id=org.ourvoiceinitiative.ourvoice">
+            <Button variant="contained">
+              Get Hello Voter for Android
+            </Button>
+          </a>
+          <a href="https://itunes.apple.com/us/app/our-voice-usa/id1275301651?ls=1&mt=8">
+            <Button variant="contained">
+              Get Hello Voter for iOS
+            </Button>
+          </a>
+        </Grid>
+        <div style={{ padding: 20 }}>
+          <Button onClick={ this.handleCloseModal }
+                  variant="contained" color="secondary">Close</Button>
+        </div>
       </> :
-      <form onSubmit={ this.handleSignUp }>
+      <form onSubmit={ this.handleSignUp } style={{ paddingBottom: '20px' }}>
         <Grid container
               spacing={ 5 }
               justify="center"
@@ -267,17 +367,17 @@ class Modal extends React.Component {
           </Grid>
           : '' }
 
-          <Grid container
-                spacing={ 5 }
-                justify="center"
-                alignItems="center">
-            <Grid item xs={ inputWidth }>
-              <Button onClick={ this.handleCloseModal }
-                      variant="contained"
-                      color="secondary">Cancel</Button>
-              <Button type="submit"
-                      variant="contained"
-                      color="primary">Sign Up</Button>
+          <Grid item xs={ inputWidth }>
+            <Grid container
+                  spacing={ 5 }
+                  justify="space-evenly"
+                  alignItems="center">
+                <Button onClick={ this.handleCloseModal }
+                        variant="contained"
+                        color="secondary">Cancel</Button>
+                <Button type="submit"
+                        variant="contained"
+                        color="primary">Sign Up</Button>
             </Grid>
           </Grid>
         </Grid>
@@ -304,6 +404,8 @@ class Modal extends React.Component {
         <div style={{ height: 20 }}></div>
 
         { form }
+
+        { alert }
 
       </ReactModal>
     )
