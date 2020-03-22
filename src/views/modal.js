@@ -17,7 +17,7 @@ import Button from '@material-ui/core/Button'
 import QRCode from 'qrcode'
 
 function _inviteLink(inviteCode, server, orgId) {
-  return server+'/HelloVoterHQ/'+(orgId?orgId+'/':'')+'mobile/invite?inviteCode='+inviteCode+'&'+(orgId?'orgId='+orgId:'server='+server)
+  return 'http'+(server.match(/:8080$/)?'':'s')+'://'+server+'/HelloVoterHQ/'+(orgId?orgId+'/':'')+'mobile/invite?inviteCode='+inviteCode+(orgId?'&orgId='+orgId:'')+(server?'&server='+server:'')
 }
 
 let openModalEventListener
@@ -38,6 +38,7 @@ class Modal extends React.Component {
       registered: window.localStorage.getItem('onboarding-widget-registered') === 'true' ? true : false,
       invitelink: window.localStorage.getItem('onboarding-widget-invitelink'),
       server: null,
+      orgId: null,
       qr: null,
       alertMsg: null,
       severity: null
@@ -90,6 +91,10 @@ class Modal extends React.Component {
       this.state.formId = this.props.formId
     } else {
       configError = true
+    }
+
+    if (this.props.orgId) {
+      this.state.orgId = this.props.orgId
     }
 
     const validQuestions = ['name', 'age', 'party-affiliation', 'address', 'registered-to-vote']
@@ -187,7 +192,7 @@ class Modal extends React.Component {
     let geocoderesponse
 
     try {
-      geocoderesponse = await fetch(`https://nominatim.openstreetmap.org/search?q=${this.state.address1 + this.address2 ? this.address2 : ''},+${this.state.city},+${this.state.state},+usa&format=json&limit=1`)
+      geocoderesponse = await fetch(`https://nominatim.openstreetmap.org/search?q=${this.state.address1 + (this.state.address2 ? this.state.address2 : '')},+${this.state.city},+${this.state.state},+usa&format=json&limit=1`)
     } catch (err) {
       this.setState({ severity: 'error', alertMsg: 'OSM problem finding that address' })
       throw new Error('There are unexpected problems; please try again later.')
@@ -215,15 +220,16 @@ class Modal extends React.Component {
       state: this.state.state,
       zip: this.state.zip,
       registered: this.state.registered,
-      latitude: geocodeobj[0].lat,
-      longitude: geocodeobj[0].lon,
+      latitude: parseFloat(geocodeobj[0].lat),
+      longitude: parseFloat(geocodeobj[0].lon),
       formId: this.state.formId
     }
 
     let hellovoterresponse
 
     try {
-      hellovoterresponse = await fetch(this.state.server + '/HelloVoterHQ/api/v1/public/onboard', {
+      const serverUrl = 'http'+(this.state.server.match(/:8080$/)?'':'s')+'://'+this.state.server+'/HelloVoterHQ/'+(this.state.orgId?this.state.orgId+'/':'')+'api/v1/public/onboard'
+      hellovoterresponse = await fetch(serverUrl, {
         method: 'POST',
         headers: {
           "Accept": "text/plain",
@@ -241,9 +247,9 @@ class Modal extends React.Component {
       throw new Error(hellovoterresponse.statusText)
     }
 
-    const invite = await hellovoterresponse.text()
+    const invite = await hellovoterresponse.json()
 
-    this.setState({ invitelink: _inviteLink(invite, this.props.server) }, () => {
+    this.setState({ invitelink: _inviteLink(invite.inviteCode, this.state.server, this.state.orgId) }, () => {
       window.localStorage.setItem('onboarding-widget-invitelink', this.state.invitelink)
     })
 
@@ -262,7 +268,9 @@ class Modal extends React.Component {
 
     const form = this.state.qr ?
       <>
-        <img src={ this.state.qr } />
+        <a href={ this.state.invitelink }>
+          <img src={ this.state.qr } />
+        </a>
         <Grid style={{ padding: 20 }}
               container
               spacing={ 5 }
