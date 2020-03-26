@@ -3,3 +3,5 @@ dist/*
 package-lock.json
 demo-target
 server.js
+cypress/screenshots
+cypress/videos

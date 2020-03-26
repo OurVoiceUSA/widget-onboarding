@@ -20,6 +20,8 @@
   background: #fff;
   border: solid 1px #333;
   border-radius: 10px;
+  max-height: 80vh;
+  overflow-y: auto;
 }
 
 @media (max-width: 920px) {

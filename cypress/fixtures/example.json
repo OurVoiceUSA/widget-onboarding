@@ -1,0 +1,10 @@
+{
+  "name": "Test User",
+  "age": 33,
+  "address1": "801 17th street north",
+  "city": "birmingham",
+  "state": "al",
+  "zip": "35203",
+  "registered-to-vote": true,
+  "party-affiliation": "Independent"
+}

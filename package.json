@@ -7,6 +7,7 @@
   },
   "description": "An embeddable widget to help onboard volunteers to the HelloVoter platform",
   "scripts": {
+    "test": "./node_modules/.bin/cypress open",
     "build": "./node_modules/.bin/webpack --config webpack.config-dev.js",
     "build-prod": "./node_modules/.bin/webpack --config webpack.config-prod.js"
   },
@@ -23,6 +24,7 @@
     "@material-ui/lab": "^4.0.0-alpha.46",
     "babel-loader": "^8.0.6",
     "css-loader": "^3.4.2",
+    "cypress": "^4.2.0",
     "html-loader": "^0.5.5",
     "qrcode": "^1.4.4",
     "react": "^16.13.0",

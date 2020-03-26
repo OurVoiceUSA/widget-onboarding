@@ -268,7 +268,7 @@ class Modal extends React.Component {
 
     const form = this.state.qr ?
       <>
-        <a href={ this.state.invitelink }>
+        <a href={ this.state.invitelink } data-cy="qr-link">
           <img src={ this.state.qr } />
         </a>
         <Grid style={{ padding: 20 }}
@@ -292,7 +292,9 @@ class Modal extends React.Component {
                   variant="contained" color="secondary">Close</Button>
         </div>
       </> :
-      <form onSubmit={ this.handleSignUp } style={{ paddingBottom: '20px' }}>
+      <form onSubmit={ this.handleSignUp }
+            data-cy="form"
+            style={{ paddingBottom: '20px' }}>
         <Grid container
               spacing={ 5 }
               justify="center"
@@ -300,6 +302,7 @@ class Modal extends React.Component {
           { questions.indexOf('name') > -1 ?
           <Grid item xs={ inputWidth }>
             <TextField placeholder="What is your name?"
+                  data-cy="name-field"
                   required
                   fullWidth
                   value={ this.state.name || '' }
@@ -311,6 +314,7 @@ class Modal extends React.Component {
           <Grid item xs={ inputWidth }>
             <FormHelperText>What is your age?</FormHelperText>
             <TextField type="number"
+                  data-cy="age-field"
                   fullWidth
                   value={ this.state.age || 18 }
                   onChange={ this.updateAge } />
@@ -321,6 +325,7 @@ class Modal extends React.Component {
           <Grid item xs={ inputWidth }>
             <FormHelperText>What is your party affiliation?</FormHelperText>
             <select value={ this.state.affiliation }
+                    data-cy="affiliation-field"
                     onChange={ this.updateAffiliation }>
               <option value={'Democrat'}>Democrat</option>
               <option value={'Republican'}>Republican</option>
@@ -333,6 +338,7 @@ class Modal extends React.Component {
           <>
           <Grid item xs={ inputWidth }>
             <TextField type="text" placeholder="Address Line 1"
+                  data-cy="address1-field"
                   required
                   fullWidth
                   value={ this.state.address1 || '' }
@@ -340,12 +346,14 @@ class Modal extends React.Component {
           </Grid>
           <Grid item xs={ inputWidth }>
             <TextField type="text" placeholder="Address Line 2"
+                  data-cy="address2-field"
                   fullWidth
                   value={ this.state.address2 || '' }
                   onChange={ this.updateAddress2 } />
           </Grid>
           <Grid item xs={ inputWidth }>
             <TextField type="text" placeholder="City"
+                  data-cy="city-field"
                   required
                   fullWidth
                   value={ this.state.city || '' }
@@ -353,6 +361,7 @@ class Modal extends React.Component {
           </Grid>
           <Grid item xs={ inputWidth }>
             <TextField type="text" placeholder="State"
+                  data-cy="state-field"
                   required
                   fullWidth
                   value={ this.state.state || '' }
@@ -360,6 +369,7 @@ class Modal extends React.Component {
           </Grid>
           <Grid item xs={ inputWidth }>
             <TextField type="text" placeholder="Zip"
+                  data-cy="zip-field"
                   required
                   fullWidth
                   value={ this.state.zip || '' }
@@ -371,11 +381,13 @@ class Modal extends React.Component {
           { questions.indexOf('registered-to-vote') > -1 ?
           <Grid item xs={ inputWidth }>
             <FormHelperText>Are you registered to vote?</FormHelperText>
-            <Checkbox checked={ this.state.registered } onChange={ this.updateRegistered } />
+            <Checkbox checked={ this.state.registered }
+              data-cy="registered-field"
+              onChange={ this.updateRegistered } />
           </Grid>
           : '' }
 
-          <Grid item xs={ inputWidth }>
+          <Grid item xs={ inputWidth } style={{ paddingBottom: '20px' }}>
             <Grid container
                   spacing={ 5 }
                   justify="space-evenly"
@@ -397,6 +409,7 @@ class Modal extends React.Component {
         isOpen={ this.state.showModal }
         className="onboarding-widget-modal"
         overlayClassName="onboarding-widget-overlay"
+        data={{ cy: "onboarding-widget-modal" }}
         shouldCloseOnOverlayClick={ false }
         onRequestClose={ this.handleCloseModal }
         >
